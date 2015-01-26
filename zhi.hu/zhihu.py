@@ -1,9 +1,19 @@
 #!/usr/bin/python
-import urllib2, json, re, os, time,HTMLParser,eml
+import urllib2, json, re, os, time,HTMLParser,eml,datetime
 from lxml import etree
-url = """http://www.zhihu.com/people/sion-wang-29"""
+url = """http://www.zhihu.com/people/yu-xiao-wei-71-85"""
+#url = """http://www.zhihu.com/people/starfire"""
 header = {}
 html_parser = HTMLParser.HTMLParser()
+def TZ_Tran(TimeStamp):
+	class GMT8(datetime.tzinfo):
+		def utcoffset(self, dt):
+			return datetime.timedelta(hours=8) + self.dst(dt)
+		def dst(self, dt):
+			return datetime.timedelta(0)
+		def tzname(self,dt):
+			return "GMT +8"
+	return str(datetime.datetime.fromtimestamp(TimeStamp,tz=GMT8()))
 def Get_Acti(content):
 	code = content.decode('utf-8', 'ignore')
 	page = etree.HTML(code)
@@ -13,7 +23,7 @@ def Get_Acti(content):
 		flag = False
 		content = i.xpath(u"div[@class='zm-profile-section-main zm-profile-section-activity-main zm-profile-activity-page-item-main']")
 		TS = int(i.attrib['data-time'])
-		T= time.ctime(TS)
+		T= TZ_Tran(TS)
 		Data =  content[0].xpath(u'a')
 		Type = "focus a "+re.split("/",Data[1].attrib['href'])[1]
 		if 'title' in Data[1].attrib:
