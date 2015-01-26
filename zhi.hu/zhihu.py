@@ -47,10 +47,16 @@ def GetNew():
 	return urllib2.urlopen(request).read()
 Arr = Get_Acti(GetNew())
 DB = os.listdir(os.path.split(os.path.realpath(__file__))[0]+"/DB")
+MsgQuene = []
 for i in Arr:
 	if (str(i["TimeStamp"])+".json" not in DB) :
-		open(os.path.split(os.path.realpath(__file__))[0]+"/DB/%s.json"%(i["TimeStamp"]),"w").write(json.dumps(i))
-		if eml.send_mail(["admin@nkucodingcat.com"],"SomeOne "+i["Type"]+" "+i["Question"],"It happened @ "+str(i["Time"])+"\n"+re.sub("\<br\>","\n",i["Answer"])):
-			print "Mail Sent"
-		else:
-			print "Error"
+		f = open(os.path.split(os.path.realpath(__file__))[0]+"/DB/%s.json"%(i["TimeStamp"]),"w")
+		f.write(json.dumps(i))
+		f.close()
+		MsgQuene.append(i)
+for i in MsgQuene:
+	if eml.send_mail(["admin@nkucodingcat.com"],"SomeOne "+i["Type"]+" "+i["Question"],"It happened @ "+str(i["Time"])+"\n"+re.sub("\<br\>","\n",i["Answer"])):
+	#if 1:
+		print "Mail Sent"
+	else:
+		print "Mail Sent Error"
