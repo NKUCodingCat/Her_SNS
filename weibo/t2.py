@@ -1,8 +1,16 @@
-import datetime,time,struct,os,time,sys,json
+import datetime,time,struct,os,time,sys,json,re
 from socket import *
 time_server = ('time.nist.gov', 123)
 TIME1970 = 2208988800L
 setdefaulttimeout(5)
+Tran_Month = {"Jan":"1","Feb":"2","Mar":"3","Apr":"4","May":"5","Jun":"6","Jul":"7","Aug":"8","Sep":"9","Sept":"9","Oct":"10","Nov":"11","Dec":"12"}
+class GMT8(datetime.tzinfo):
+	def utcoffset(self, dt):
+		return datetime.timedelta(hours=8) + self.dst(dt)
+	def dst(self, dt):
+		return datetime.timedelta(0)
+	def tzname(self,dt):
+		return "GMT +8"
 def getstamp():
 	t = 0
 	ret = 0
@@ -31,17 +39,13 @@ def getstamp():
 	return time.time()
 		
 def Now():
-	class GMT8(datetime.tzinfo):
-		def utcoffset(self, dt):
-			return datetime.timedelta(hours=8) + self.dst(dt)
-		def dst(self, dt):
-			return datetime.timedelta(0)
-		def tzname(self,dt):
-			return "GMT +8"
+	
 	S = getstamp()
 	T = time.time()-S
 	if T<0:
 		T=0
 	open(os.path.split(os.path.realpath(__file__))[0]+"/time.txt","a").write(json.dumps([time.ctime(S),time.ctime(time.time()),T])+"\n")
 	return [datetime.datetime.fromtimestamp(time.time(),tz=GMT8()).hour,T]
-#Now()
+def Tran_Weibo_Ts(SRC):    #As EST Time
+	D = re.split("[: ]",SRC)
+	return time.mktime(time.strptime("%s %s %s %s %s %s"%(D[-1],Tran_Month[D[1]],D[2],D[3],D[4],D[5]),"%Y %m %d %H %M %S"))
